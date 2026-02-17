@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Input Data Nawasena</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', sans-serif; }
+        .navbar { background-color: #001f3f; border-bottom: 3px solid gold; }
+        .navbar-brand { color: gold !important; font-weight: bold; }
+        .card { border-radius: 12px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        #loginPage, #mainPage { display: none; margin-top: 50px; }
+        .catatan-tanah { font-size: 0.85rem; color: #d9534f; font-style: italic; margin-top: 5px; }
+        .table-container { margin-top: 30px; margin-bottom: 50px; }
+        .section-title { border-left: 4px solid gold; padding-left: 10px; margin-bottom: 20px; font-weight: bold; color: #001f3f; }
+        .badge-sold { background-color: #d9534f; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; }
+        .text-booking { color: #007bff; font-weight: bold; } /* Warna Biru untuk Booking */
+        .text-sisa { color: #dc3545; font-weight: bold; }    /* Warna Merah untuk Sisa */
+    </style>
+</head>
+<body onload="checkLogin()">
+
+    <nav class="navbar navbar-expand-lg sticky-top" id="navBar" style="display: none;">
+        <div class="container">
+            <a class="navbar-brand" href="#">NAWASENA PROPERTY</a>
+            <button class="btn btn-outline-warning btn-sm" onclick="logout()">Logout</button>
+        </div>
+    </nav>
+
+    <div id="loginPage" class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-4">
+                <div class="card p-4 text-center">
+                    <h4 class="mb-4">Admin Login</h4>
+                    <input type="password" id="passInput" class="form-control mb-3" placeholder="Masukkan Password">
+                    <button class="btn btn-primary w-100" style="background-color: #001f3f; border:none;" onclick="login()">Masuk</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="mainPage" class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-12">
+                <div class="card p-4">
+                    <h3 class="mb-4 text-center">Form Transaksi Unit Properti</h3>
+                    <form id="propertyForm" onsubmit="event.preventDefault(); simpanData();">
+                        
+                        <div class="row">
+                            <div class="col-md-4">
+                                <p class="section-title">Data Pihak & Sumber</p>
+                                <div class="mb-3">
+                                    <label class="form-label">Nama Marketing</label>
+                                    <input type="text" class="form-control" id="namaMarketing" placeholder="Ketik nama..." required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Nama Konsumen</label>
+                                    <input type="text" class="form-control" id="namaKonsumen" placeholder="Sesuai KTP..." required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Sumber Leads</label>
+                                    <select class="form-select" id="sumberLeads" required>
+                                        <option value="" disabled selected>-- Pilih Sumber Leads --</option>
+                                        <option value="Instagram Ads">Instagram Ads</option>
+                                        <option value="Facebook Ads">Facebook Ads</option>
+                                        <option value="Canvassing">Canvassing</option>
+                                        <option value="Walk-in/Lokasi">Walk-in/Lokasi</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <p class="section-title">Data Spesifikasi Unit</p>
+                                <div class="mb-3">
+                                    <label class="form-label">Proyek</label>
+                                    <select class="form-select" id="pilihProyek" onchange="updateBlok()" required>
+                                        <option value="" disabled selected>-- Pilih Proyek --</option>
+                                        <option value="Edelweis Residence 2">Edelweis Residence 2</option>
+                                        <option value="Edelweis Residence 3">Edelweis Residence 3</option>
+                                        <option value="Verde House">Verde House</option>
+                                    </select>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6 mb-3">
+                                        <label class="form-label">Blok</label>
+                                        <select class="form-select" id="blokUnit" onchange="updateLuasTanah()" required>
+                                            <option value="" disabled selected>Pilih Blok...</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-6 mb-3">
+                                        <label class="form-label">Jumlah Lantai</label>
+                                        <select class="form-select" id="jumlahLantai">
+                                            <option value="1">1 Lantai</option>
+                                            <option value="2">2 Lantai</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6 mb-3">
+                                        <label class="form-label">Luas Bangunan (m²)</label>
+                                        <input type="number" class="form-control" id="luasBangunan" placeholder="Contoh: 36" required>
+                                    </div>
+                                    <div class="col-6 mb-3">
+                                        <label class="form-label">Luas Tanah (m²)</label>
+                                        <input type="text" class="form-control bg-light" id="luasTanah" readonly placeholder="Otomatis">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <p class="section-title">Informasi Pembayaran</p>
+                                <div class="mb-3">
+                                    <label class="form-label">Skema Pembayaran</label>
+                                    <select class="form-select" id="skemaBayar" required>
+                                        <option value="" disabled selected>-- Pilih Skema --</option>
+                                        <option value="Cash Keras">Cash Keras</option>
+                                        <option value="Cash Bertahap">Cash Bertahap</option>
+                                        <option value="KPR">KPR</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Harga Booking (Rp)</label>
+                                    <input type="number" class="form-control" id="hargaBooking" placeholder="Contoh: 5000000" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Harga Jual Asli (Rp)</label>
+                                    <input type="number" class="form-control" id="hargaJual" placeholder="Contoh: 450000000" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <p class="catatan-tanah text-center mb-3">*Informasi: Luas tanah tercantum adalah luas standar. Penambahan luas tanah akan dikenakan biaya kelebihan tanah sesuai ketentuan.</p>
+                        <button type="submit" class="btn btn-success w-100 py-2 fw-bold">SIMPAN & LOCK UNIT</button>
+                    </form>
+                </div>
+
+                <div class="table-container">
+                    <div class="card p-4">
+                        <h4 class="mb-3">Database Penjualan Unit (Real-time)</h4>
+                        <div class="table-responsive">
+                            <table class="table table-hover table-sm" style="font-size: 0.85rem;">
+                                <thead class="table-dark text-center">
+                                    <tr>
+                                        <th>Marketing</th>
+                                        <th>Konsumen</th>
+                                        <th>Sumber</th>
+                                        <th>Unit & Proyek</th>
+                                        <th>LT/LB</th>
+                                        <th>Skema</th>
+                                        <th>Booking</th>
+                                        <th>Harga Jual</th>
+                                        <th>Sisa Pembayaran</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabelBody" class="text-center align-middle">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const databaseUnit = {
+            "Edelweis Residence 2": [{ blok: "D-2", lt: 47 }, { blok: "D-3", lt: 94 }, { blok: "E-1", lt: 61.5 }, { blok: "E-6", lt: 43 }],
+            "Edelweis Residence 3": [{ blok: "A-1", lt: 100 }, { blok: "A-2", lt: 62 }, { blok: "A-3", lt: 62 }, { blok: "C-5", lt: 78 }],
+            "Verde House": [{ blok: "A-3", lt: 42 }, { blok: "A-7", lt: 45 }, { blok: "B-4", lt: 44 }]
+        };
+
+        let unitTerbooked = [];
+
+        function login() {
+            const pass = document.getElementById('passInput').value;
+            if (pass === "nawasena123") {
+                localStorage.setItem('isLogged', 'true');
+                checkLogin();
+            } else { alert("Password salah!"); }
+        }
+
+        function checkLogin() {
+            if (localStorage.getItem('isLogged') === 'true') {
+                document.getElementById('loginPage').style.display = 'none';
+                document.getElementById('mainPage').style.display = 'block';
+                document.getElementById('navBar').style.display = 'flex';
+            } else {
+                document.getElementById('loginPage').style.display = 'block';
+                document.getElementById('mainPage').style.display = 'none';
+                document.getElementById('navBar').style.display = 'none';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('isLogged');
+            location.reload();
+        }
+
+        function updateBlok() {
+            const proyek = document.getElementById('pilihProyek').value;
+            const blokSelect = document.getElementById('blokUnit');
+            blokSelect.innerHTML = '<option value="" disabled selected>Pilih Blok...</option>';
+            document.getElementById('luasTanah').value = "";
+
+            if (databaseUnit[proyek]) {
+                databaseUnit[proyek].forEach(item => {
+                    const idUnit = `${proyek}-${item.blok}`;
+                    const isSold = unitTerbooked.includes(idUnit);
+                    
+                    let opt = document.createElement('option');
+                    opt.value = item.blok;
+                    opt.text = isSold ? `${item.blok} (TERJUAL)` : item.blok;
+                    opt.disabled = isSold;
+                    opt.setAttribute('data-lt', item.lt);
+                    blokSelect.appendChild(opt);
+                });
+            }
+        }
+
+        function updateLuasTanah() {
+            const blokSelect = document.getElementById('blokUnit');
+            const selectedOption = blokSelect.options[blokSelect.selectedIndex];
+            document.getElementById('luasTanah').value = selectedOption.getAttribute('data-lt');
+        }
+
+        function simpanData() {
+            const proyek = document.getElementById('pilihProyek').value;
+            const blok = document.getElementById('blokUnit').value;
+            const hargaBooking = Number(document.getElementById('hargaBooking').value);
+            const hargaJual = Number(document.getElementById('hargaJual').value);
+            const sisaBayar = hargaJual - hargaBooking;
+            
+            unitTerbooked.push(`${proyek}-${blok}`);
+
+            const data = {
+                mkt: document.getElementById('namaMarketing').value,
+                ksm: document.getElementById('namaKonsumen').value,
+                sumber: document.getElementById('sumberLeads').value,
+                skema: document.getElementById('skemaBayar').value,
+                lt: document.getElementById('luasTanah').value,
+                lb: document.getElementById('luasBangunan').value
+            };
+
+            const tbody = document.getElementById('tabelBody');
+            const row = `<tr>
+                <td>${data.mkt}</td>
+                <td>${data.ksm}</td>
+                <td><span class="badge bg-primary">${data.sumber}</span></td>
+                <td><strong>${proyek}</strong><br><span class="badge-sold">Blok ${blok}</span></td>
+                <td>${data.lt}/${data.lb}</td>
+                <td>${data.skema}</td>
+                <td class="text-booking">Rp ${hargaBooking.toLocaleString()}</td>
+                <td>Rp ${hargaJual.toLocaleString()}</td>
+                <td class="text-sisa">Rp ${sisaBayar.toLocaleString()}</td>
+            </tr>`;
+            
+            tbody.innerHTML += row;
+            alert(`Transaksi Berhasil! Unit ${blok} telah terkunci.`);
+            document.getElementById('propertyForm').reset();
+            updateBlok();
+        }
+    </script>
+</body>
+</html>
